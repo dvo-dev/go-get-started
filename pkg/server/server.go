@@ -15,7 +15,7 @@ func (s Server) InitializeServer() *Server {
 }
 
 // GetMux returns the Server's mux object
-func (s Server) GetMux() *http.ServeMux {
+func (s *Server) GetMux() *http.ServeMux {
 	return s.mux
 }
 
