@@ -42,10 +42,15 @@ type HealthStatus struct {
 // function.
 func HandleHealth() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(HealthStatus{
-			Status: "healthy",
-		})
+		switch r.Method {
+		case http.MethodGet:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(HealthStatus{
+				Status: "healthy",
+			})
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+		}
 	}
 }
