@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dvo-dev/go-get-started/pkg/handlers"
 	"github.com/dvo-dev/go-get-started/pkg/server"
 )
 
@@ -41,6 +42,10 @@ func run() error {
 	}
 
 	// TODO: add route handlers
+	s.AssignHandler(
+		"/health",
+		handlers.RecoveryWrapper(handlers.HandleHealth()),
+	)
 
 	log.Println("Webapp server has been initialized, now serving...")
 	err = http.ListenAndServe(webappPort, s.GetMux())
