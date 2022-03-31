@@ -20,6 +20,12 @@ func main() {
 	}
 }
 
+// While we could directly init + serve directly in `main()`, having a separate
+// function will allow us to call it and reattempt serving should we error out.
+//
+// This is a simple "dumb" approach for `main() to have multiple attempts at
+// initializing, as well as soft restarting the server if it crashes at any
+// point.
 func run() error {
 	var err error = nil
 	s := server.Server{}.InitializeServer()
