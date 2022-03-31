@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/dvo-dev/go-get-started/pkg/payloads"
 )
 
 // RecoveryWrapper is a function wrapper for the actual intended route handling
@@ -42,15 +44,27 @@ type HealthStatus struct {
 // function.
 func HandleHealth() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		w.Header().Set("Content-Type", "application/json")
+
 		switch r.Method {
+
 		case http.MethodGet:
-			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(HealthStatus{
+			err = json.NewEncoder(w).Encode(HealthStatus{
 				Status: "healthy",
 			})
+
 		default:
-			w.WriteHeader(http.StatusBadRequest)
+			cErr := payloads.ClientErrorBadMethod{
+				RequestMethod: r.Method,
+			}
+			w.WriteHeader(cErr.StatusCode())
+			err = json.NewEncoder(w).Encode(cErr.ClientErrorMsg())
+		}
+
+		if err != nil {
+			log.Printf("HandleHealth - error writing response: %v", err)
 		}
 	}
 }
