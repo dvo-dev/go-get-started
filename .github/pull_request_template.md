@@ -2,24 +2,24 @@
 
 # Summary
 
-## Related Issues
+### Related Issues
 <!--Required-->
 
 - Completes #69
 - Partial fix #420
 
-## Contributors
+### Contributors
 <!--Required-->
 - @github: implementer
 - @deeznutz: SQL consultation
 
-## Affected Modules
+### Affected Modules
 <!--Required-->
 
 - `pkg/database`
 - `cmd/webapp`
 
-## Description
+### Description
 <!--Required-->
 This is where you should describe the contents of this pull request at a **high level**, aim for 2-3 paragraphs of content but more is always better than less.
 
@@ -30,10 +30,10 @@ Try to describe the changes in a "did X by Y", e.g. improved logging by adding m
 
 If altering configurations/usage of external depedencies such as caches, databases, etc. describe it in this area.
 
-## Redis
+### Redis
 Adding usage for session caches.
 
-## Elasticsearch
+### Elasticsearch
 Change lookup parameters
 
 # Testing (Unit/Integration/Performance)
