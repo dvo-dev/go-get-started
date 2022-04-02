@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/dvo-dev/go-get-started/pkg/handlers"
@@ -34,11 +33,7 @@ func run() error {
 	// TODO: env vars
 	webappPort := os.Getenv("WEBAPP_HOST_PORT")
 	if len(webappPort) == 0 {
-		webappPort = fmt.Sprintf(
-			"%s:%s",
-			"0.0.0.0",
-			"8080",
-		)
+		webappPort = "8080"
 	}
 
 	// TODO: add route handlers
@@ -48,7 +43,7 @@ func run() error {
 	)
 
 	log.Println("Webapp server has been initialized, now serving...")
-	err = http.ListenAndServe(webappPort, s.GetMux())
+	err = s.ServeAndListen(fmt.Sprintf("0.0.0.0:%s", webappPort))
 
 	return err
 }

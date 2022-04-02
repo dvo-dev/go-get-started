@@ -14,12 +14,17 @@ func (s Server) InitializeServer() *Server {
 	return server
 }
 
-// GetMux returns the Server's mux object
+// GetMux returns the Server's mux object.
 func (s *Server) GetMux() *http.ServeMux {
 	return s.mux
 }
 
-// AssignHandler assigns a given route to the desired handler function
+// ServeAndListens begins serving the Server on the given address.
+func (s *Server) ServeAndListen(addr string) error {
+	return http.ListenAndServe(addr, s.mux)
+}
+
+// AssignHandler assigns a given route to the desired handler function.
 func (s *Server) AssignHandler(route string, handlerFn http.HandlerFunc) {
 	s.mux.HandleFunc(route, handlerFn)
 }
