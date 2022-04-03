@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -165,6 +166,77 @@ func TestDataStorage_StoreData(t *testing.T) {
 	}
 	expMsg := responses.DataStored{
 		DataName: "test",
+		Data:     []byte("test data"),
+	}.GetResponse()
+	// Have to do this back and forth because Data is undefined type
+	JSON, _ := json.Marshal(expMsg)
+	_ = json.Unmarshal(JSON, &expMsg)
+	if !reflect.DeepEqual(expMsg, recMsg) {
+		t.Errorf(
+			"expected response: %+v but got: %+v",
+			expMsg, recMsg,
+		)
+	}
+}
+
+func TestDataStorage_GetData(t *testing.T) {
+	// Init test server + client
+	dsh := DataStorageHandler{}.Initialize(
+		datastorage.MemStorage{}.Initialize(),
+	)
+	testServer := httptest.NewServer(dsh.HandleClientRequest())
+	testURL := testServer.URL + "/datastorage"
+	testClient := http.DefaultTransport
+
+	testName := "testname"
+	testData := []byte("test data")
+	dsh.storage.StoreData(testName, testData)
+
+	// Make GET request
+	path := fmt.Sprintf("%s?name=%s", testURL, testName)
+	req, err := http.NewRequest(http.MethodGet, path, nil)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
+	// resp, err := testClient.Get(path)
+	resp, err := testClient.RoundTrip(req)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
+
+	// Check status code
+	if resp.StatusCode != http.StatusFound {
+		t.Errorf(
+			"expected status code: %d but got: %d",
+			http.StatusCreated,
+			resp.StatusCode,
+		)
+	}
+
+	// Read response body + assert
+	defer resp.Body.Close()
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
+	recMsg := responses.ResponsePayload{}
+	err = json.Unmarshal(data, &recMsg)
+	if err != nil {
+		t.Error(
+			"incorrect response format",
+		)
+	}
+	expMsg := responses.DataFound{
+		DataName: testName,
 		Data:     []byte("test data"),
 	}.GetResponse()
 	// Have to do this back and forth because Data is undefined type
