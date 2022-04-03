@@ -13,14 +13,15 @@ import (
 // `string` keys.
 type MemStorage struct {
 	data map[string][]byte
-	rwMu sync.RWMutex
+	rwMu *sync.RWMutex
 }
 
 // InitializeMemStorage initializes and returns a pointer to a clean
 // `MemStorage`.
-func (ms MemStorage) Initialize() DataStorage {
+func (ms MemStorage) Initialize() *MemStorage {
 	return &MemStorage{
 		data: make(map[string][]byte),
+		rwMu: &sync.RWMutex{},
 	}
 }
 

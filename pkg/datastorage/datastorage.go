@@ -3,9 +3,6 @@ package datastorage
 // DataStorage is an interface to be satisified by any storage implementation,
 // regardless of whether it is in memory, drive, etc.
 type DataStorage interface {
-	// Initialize creates and returns a pointer to a clean `DataStorage`
-	Initialize() DataStorage
-
 	// RetrieveData allows user access to the DataStorage implementation,
 	// retrieving data associated with the given `name`.
 	//
