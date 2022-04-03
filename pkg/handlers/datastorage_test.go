@@ -38,6 +38,12 @@ func TestDataStorage_BadMethod(t *testing.T) {
 		)
 	}
 	resp, err := testClient.Do(req)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
 	if resp.StatusCode != http.StatusMethodNotAllowed {
 		t.Errorf(
 			"expected error code: %d but got: %d",
@@ -190,7 +196,13 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 	testName := "testname"
 	testData := []byte("test data")
-	dsh.storage.StoreData(testName, testData)
+	err := dsh.storage.StoreData(testName, testData)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
 
 	// Make GET request
 	path := fmt.Sprintf("%s?name=%s", testURL, testName)
@@ -317,7 +329,13 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 	testName := "testname"
 	testData := []byte("test data")
-	dsh.storage.StoreData(testName, testData)
+	err := dsh.storage.StoreData(testName, testData)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
 
 	// Make GET request
 	path := fmt.Sprintf("%s?name=%s", testURL, testName)

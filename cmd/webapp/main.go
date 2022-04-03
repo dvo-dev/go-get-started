@@ -28,7 +28,7 @@ func main() {
 // initializing, as well as soft restarting the server if it crashes at any
 // point.
 func run() error {
-	var err error = nil
+	var err error
 	s := server.Server{}.InitializeServer()
 
 	// TODO: env vars
@@ -44,7 +44,6 @@ func run() error {
 	)
 
 	mem := datastorage.MemStorage{}.Initialize()
-	mem.StoreData("hello", []byte("deez nutz"))
 	dsHandler := handlers.DataStorageHandler{}.Initialize(
 		mem,
 	)

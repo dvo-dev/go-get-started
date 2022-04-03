@@ -160,7 +160,14 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 	defer file.Close()
-	io.Copy(&dataBuffer, file)
+	_, err = io.Copy(&dataBuffer, file)
+	if err != nil {
+		log.Printf(
+			"DataStorageHandler - failed to read request file with key: '%s'\n\t%v",
+			name, err,
+		)
+		return err
+	}
 	data := dataBuffer.Bytes()
 
 	// Attempt to write the data to our storage
