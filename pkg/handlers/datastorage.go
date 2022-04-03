@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dvo-dev/go-get-started/pkg/customerrors"
 	"github.com/dvo-dev/go-get-started/pkg/datastorage"
@@ -39,6 +42,7 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 			err = h.retrieveData(w, r)
 
 		case http.MethodPost:
+			err = h.storeData(w, r)
 
 		case http.MethodDelete:
 
@@ -85,5 +89,68 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	// Attempt to send retrieved data to the client
 	w.WriteHeader(http.StatusFound)
 	_, err = w.Write(data)
+	if err == nil {
+		log.Printf(
+			"DataStorageHandler - successfully retrieved data with key: %s",
+			dataKey,
+		)
+	}
 	return err
+}
+
+func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) error {
+	// Parse request params
+	err := r.ParseMultipartForm(2 << 20) // TODO: set constant somewhere
+	if err != nil {
+		log.Printf(
+			"DataStorageHandler - failed to parse storage request: %v",
+			err,
+		)
+		return err
+	}
+
+	// Get user defined name to associate with data
+	name := strings.TrimSpace(r.PostFormValue("name"))
+	if len(name) > 0 {
+		log.Printf(
+			"DataStorageHandler - attempting to write data to key: %s",
+			name,
+		)
+	} else {
+		log.Println(
+			"DataStorageHandler - no name given by client, will use file name...",
+		)
+	}
+
+	// Read user uploaded data
+	var dataBuffer bytes.Buffer
+	file, header, err := r.FormFile("data")
+	if len(name) == 0 {
+		name = header.Filename
+	}
+	if err != nil {
+		log.Printf(
+			"DataStorageHandler - failed to read request file with key: %s\n\t%v",
+			name, err,
+		)
+		return err
+	}
+	defer file.Close()
+	io.Copy(&dataBuffer, file)
+	data := dataBuffer.Bytes()
+
+	// Attempt to write the data to our storage
+	err = h.storage.StoreData(name, data)
+	switch err {
+	// Other errors in the future
+	case nil:
+		log.Printf(
+			"successfully wrote to storage data with key: %s",
+			name,
+		)
+		w.WriteHeader(http.StatusCreated)
+		return nil
+	default:
+		return err
+	}
 }
