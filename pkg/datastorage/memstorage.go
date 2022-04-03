@@ -31,11 +31,10 @@ func (ms MemStorage) Initialize() *MemStorage {
 //
 // This method is thread safe.
 func (ms *MemStorage) RetrieveData(name string) ([]byte, error) {
-	// Acquire a read lock
+	// Only block writers
 	ms.rwMu.RLock()
 	defer ms.rwMu.RUnlock()
 
-	// Check if data exists associated with the given name
 	data, found := ms.data[name]
 	if !found {
 		return []byte{}, customerrors.DataStorageNameNotFound{
@@ -43,7 +42,6 @@ func (ms *MemStorage) RetrieveData(name string) ([]byte, error) {
 		}
 	}
 
-	// Return data with no error elsewise
 	return data, nil
 }
 
@@ -56,15 +54,11 @@ func (ms *MemStorage) RetrieveData(name string) ([]byte, error) {
 //
 // This method is thread safe.
 func (ms *MemStorage) StoreData(name string, data []byte) error {
-	// Acquire a complete mutual exclusion lock
 	ms.rwMu.Lock()
 	defer ms.rwMu.Unlock()
 
-	// Write the data and map to the assigned name
 	ms.data[name] = data
 
-	// TODO: add error handling for any future features that may require it,
-	// e.g. memory capacity, etc.
 	return nil
 }
 
@@ -74,11 +68,9 @@ func (ms *MemStorage) StoreData(name string, data []byte) error {
 //
 // This method is thread safe.
 func (ms *MemStorage) DeleteData(name string) error {
-	// Acquire a complete mutual exclusion lock
 	ms.rwMu.Lock()
 	defer ms.rwMu.Unlock()
 
-	// Check if data exists associated with the given name
 	_, found := ms.data[name]
 	if !found {
 		return customerrors.DataStorageNameNotFound{
@@ -86,7 +78,6 @@ func (ms *MemStorage) DeleteData(name string) error {
 		}
 	}
 
-	// Delete the data and return no error
 	delete(ms.data, name)
 	return nil
 }
