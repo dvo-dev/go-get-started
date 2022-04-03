@@ -8,6 +8,7 @@ build:
 	go build -o $(OBJDIR)	./...
 
 test:
+	go clean -testcache
 	go test -race ./...
 
 run: build

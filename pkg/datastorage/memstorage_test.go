@@ -1,6 +1,9 @@
 package datastorage
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
 
 func TestMemStorage_ImplementsDataStorage(t *testing.T) {
 	var _ DataStorage = &MemStorage{}
@@ -154,4 +157,33 @@ func TestMemStorage_DeleteData(t *testing.T) {
 			t.Error("MemStorage data should be empty")
 		}
 	})
+}
+
+func TestMemStorage_ThreadSafe(t *testing.T) {
+	// -race test flag will detect race conditions
+	var wg sync.WaitGroup
+	start := make(chan struct{})
+
+	mem := MemStorage{}.Initialize()
+	dataName := "test"
+	testData := []byte("test data")
+
+	for i := 0; i < 69; i++ {
+		wg.Add(1)
+
+		go func(itr int) {
+			defer wg.Done()
+			<-start
+			if itr%3 == 0 {
+				_ = mem.StoreData(dataName, testData)
+			} else if itr%3 == 1 {
+				_, _ = mem.RetrieveData(dataName)
+			} else {
+				_ = mem.DeleteData(dataName)
+			}
+		}(i)
+	}
+
+	close(start) // Start after all workers created
+	wg.Wait()    // Wait for workers to complete
 }
