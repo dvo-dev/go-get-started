@@ -35,10 +35,10 @@ func (h DataStorageHandler) Initialize(storage datastorage.DataStorage) *DataSto
 // To use, assign to your `http.Handler` with the desired URL pattern.
 func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Catch any anomaly errors - will write status code 500
 		var err error
 
 		switch r.Method {
-
 		case http.MethodGet:
 			err = h.retrieveData(w, r)
 
@@ -52,12 +52,16 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 				RequestMethod: r.Method,
 			}
 			w.WriteHeader(cErr.StatusCode())
-			err = json.NewEncoder(w).Encode(cErr.ClientErrorMsg())
+			if rErr := json.NewEncoder(w).Encode(cErr.ClientErrorMsg()); rErr != nil {
+				log.Printf(
+					"DataStorageHandler - writing error response failed: %v",
+					rErr,
+				)
+			}
 			return
 		}
 
 		if err != nil {
-			log.Printf("DataStorageHandler - error writing response: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
@@ -108,7 +112,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 		}
 		if rErr := json.NewEncoder(w).Encode(cErr); rErr != nil {
 			log.Printf(
-				"DataStorageHandler - writing response failed: %v",
+				"DataStorageHandler - writing error response failed: %v",
 				rErr,
 			)
 		}
@@ -161,7 +165,7 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 
 	// Attempt to write the data to our storage
 	err = h.storage.StoreData(name, data)
-	switch err {
+	switch err.(type) {
 	// Other errors in the future
 	case nil:
 		log.Printf(
@@ -228,7 +232,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 		}
 		if rErr := json.NewEncoder(w).Encode(cErr); rErr != nil {
 			log.Printf(
-				"DataStorageHandler - writing response failed: %v",
+				"DataStorageHandler - writing error response failed: %v",
 				rErr,
 			)
 		}
