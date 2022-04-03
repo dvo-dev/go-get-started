@@ -27,4 +27,5 @@ type DataStorage interface {
 	// or if the deletion fails.
 	//
 	// Callers may assume this method is concurrently safe.
+	DeleteData(name string) error
 }
