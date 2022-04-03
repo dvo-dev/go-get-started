@@ -16,6 +16,14 @@ type MemStorage struct {
 	rwMu *sync.RWMutex
 }
 
+// InitializeMemStorage initializes and returns a pointer to a clean
+// `MemStorage`.
+func (ms MemStorage) Initialize() DataStorage {
+	return &MemStorage{
+		data: make(map[string][]byte),
+	}
+}
+
 // RetrieveData checks the `MemStorage` for data associated with a given `name`.
 //
 // If the `name` is found, returns the data (`[]byte`), elsewise returns error.
