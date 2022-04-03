@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dvo-dev/go-get-started/pkg/payloads"
+	"github.com/dvo-dev/go-get-started/pkg/customerrors"
 )
 
 // RecoveryWrapper is a function wrapper for the actual intended route handling
@@ -56,7 +56,7 @@ func HandleHealth() http.HandlerFunc {
 			})
 
 		default:
-			cErr := payloads.ClientErrorBadMethod{
+			cErr := customerrors.ClientErrorBadMethod{
 				RequestMethod: r.Method,
 			}
 			w.WriteHeader(cErr.StatusCode())

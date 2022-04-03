@@ -1,4 +1,4 @@
-package payloads
+package customerrors
 
 import (
 	"fmt"
