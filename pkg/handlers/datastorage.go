@@ -90,7 +90,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 		); rErr != nil {
 			log.Printf(
 				"DataStorageHander - data retrieved but writing response failed: %v",
-				err,
+				rErr,
 			)
 		}
 		return nil
@@ -171,7 +171,7 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 		}); rErr != nil {
 			log.Printf(
 				"DataStorageHander - data written but writing response failed: %v",
-				err,
+				rErr,
 			)
 		}
 		return nil
