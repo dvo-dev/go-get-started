@@ -43,7 +43,7 @@ func run() error {
 	)
 
 	log.Println("Webapp server has been initialized, now serving...")
-	err = s.ServeAndListen(fmt.Sprintf("0.0.0.0:%s", webappPort))
+	err = s.ServeAndListen(fmt.Sprintf(":%s", webappPort))
 
 	return err
 }
