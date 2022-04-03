@@ -205,7 +205,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 		); rErr != nil {
 			log.Printf(
 				"DataStorageHander - data deleted but writing response failed: %v",
-				err,
+				rErr,
 			)
 		}
 		return nil
