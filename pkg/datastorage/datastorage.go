@@ -8,7 +8,7 @@ type DataStorage interface {
 	//
 	// Returns the data in byte forms if found, error elsewise.
 	//
-	// This method is concurrently safe - multiple reads to the same data is
+	// This method is thread safe - multiple reads to the same data is
 	// allowed but writers will be blocked until their turn.
 	RetrieveData(name string) ([]byte, error)
 
@@ -18,7 +18,7 @@ type DataStorage interface {
 	// This method will overwrite existing data if an already existing `name` is
 	// given - returns an error if write fails.
 	//
-	// Callers may assume this method is concurrently safe.
+	// Callers may assume this method is thread safe.
 	StoreData(name string, data []byte) error
 
 	// DeleteData allows uers to delete data associated with a given `name`.
@@ -26,6 +26,6 @@ type DataStorage interface {
 	// This method returns an error if there is no data associated with `name`,
 	// or if the deletion fails.
 	//
-	// Callers may assume this method is concurrently safe.
+	// Callers may assume this method is thread safe.
 	DeleteData(name string) error
 }

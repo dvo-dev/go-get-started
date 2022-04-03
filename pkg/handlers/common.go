@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-
-	"github.com/dvo-dev/go-get-started/pkg/payloads"
 )
 
 // RecoveryWrapper is a function wrapper for the actual intended route handling
@@ -56,7 +54,7 @@ func HandleHealth() http.HandlerFunc {
 			})
 
 		default:
-			cErr := payloads.ClientErrorBadMethod{
+			cErr := errors.ClientErrorBadMethod{
 				RequestMethod: r.Method,
 			}
 			w.WriteHeader(cErr.StatusCode())
