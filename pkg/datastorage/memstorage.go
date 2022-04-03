@@ -13,7 +13,7 @@ import (
 // `string` keys.
 type MemStorage struct {
 	data map[string][]byte
-	rwMu *sync.RWMutex
+	rwMu sync.RWMutex
 }
 
 // InitializeMemStorage initializes and returns a pointer to a clean
