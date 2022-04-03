@@ -48,6 +48,7 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 
 		case http.MethodDelete:
 			err = h.deleteData(w, r)
+
 		default:
 			cErr := customerrors.ClientErrorBadMethod{
 				RequestMethod: r.Method,
