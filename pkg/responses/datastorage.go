@@ -2,13 +2,15 @@ package responses
 
 import "fmt"
 
+// DataFound is the client response generator when data is successfully
+// retrieved from `DataStorage`.
 type DataFound struct {
 	DataName string
 	Data     []byte // TODO: add metadata?
 }
 
-func (d DataFound) GetResponse() ResponsePayload {
-	return ResponsePayload{
+func (d DataFound) GetResponse() responsePayload {
+	return responsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data with name: '%s' found",
@@ -24,13 +26,15 @@ func (d DataFound) GetResponse() ResponsePayload {
 	}
 }
 
+// DataStored is the client response generator when data is successfully
+// written to `DataStorage`.
 type DataStored struct {
 	DataName string
 	Data     []byte
 }
 
-func (d DataStored) GetResponse() ResponsePayload {
-	return ResponsePayload{
+func (d DataStored) GetResponse() responsePayload {
+	return responsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data written to storage with name: '%s'",
@@ -44,12 +48,14 @@ func (d DataStored) GetResponse() ResponsePayload {
 	}
 }
 
+// DataDeleted is the client response generator when data is successfully
+// deleted from `DataStorage`.
 type DataDeleted struct {
 	DataName string
 }
 
-func (d DataDeleted) GetResponse() ResponsePayload {
-	return ResponsePayload{
+func (d DataDeleted) GetResponse() responsePayload {
+	return responsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data with name: '%s' deleted",
