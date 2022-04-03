@@ -43,15 +43,14 @@ func run() error {
 		handlers.RecoveryWrapper(handlers.HandleHealth()),
 	)
 
+	// TODO: decide if we want to attach handlers to the server
 	mem := datastorage.MemStorage{}.Initialize()
 	dsHandler := handlers.DataStorageHandler{}.Initialize(
 		mem,
 	)
 	s.AssignHandler(
 		"/datastorage",
-		handlers.RecoveryWrapper(
-			dsHandler.HandleClientRequest(),
-		),
+		handlers.RecoveryWrapper(dsHandler.HandleClientRequest()),
 	)
 
 	log.Println("Webapp server has been initialized, now serving...")
