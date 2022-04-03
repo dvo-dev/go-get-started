@@ -45,7 +45,7 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 			err = h.storeData(w, r)
 
 		case http.MethodDelete:
-
+			err = h.deleteData(w, r)
 		default:
 			cErr := customerrors.ClientErrorBadMethod{
 				RequestMethod: r.Method,
@@ -65,37 +65,44 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	// Parse request param
 	dataKey := r.URL.Query().Get("name")
 	log.Printf(
-		"DataStorageHandler - attempting retrieval of data associated with the key %s",
+		"DataStorageHandler - attempting retrieval of data associated with the key: %s",
 		dataKey,
 	)
 
 	// Attempt to retrieve the data from our storage
 	data, err := h.storage.RetrieveData(dataKey)
-	if err != nil {
+	switch err {
+	case nil:
+		// Successfully retrieved associated data
+		log.Printf(
+			"DataStorageHandler - successfully retrieved data with the key: %s",
+			dataKey,
+		)
+		w.WriteHeader(http.StatusFound)
+		_, err = w.Write(data)
+		if err == nil {
+			log.Printf(
+				"DataStorageHandler - successfully retrieved data with key: %s",
+				dataKey,
+			)
+		}
+		return err
+	case customerrors.DataStorageNameNotFound{}:
+		// Tell client if they used a bad key
 		log.Printf(
 			"DataStorageHandler - failed to retrieve data with the key: %s\n\t%v",
 			dataKey, err,
 		)
 
-		// Tell client if they used a bad key
 		cErr := customerrors.ClientErrorMessage{
 			Error: err.Error(),
 		}
 		w.WriteHeader(http.StatusNotFound)
 		err := json.NewEncoder(w).Encode(cErr)
 		return err
+	default:
+		return err
 	}
-
-	// Attempt to send retrieved data to the client
-	w.WriteHeader(http.StatusFound)
-	_, err = w.Write(data)
-	if err == nil {
-		log.Printf(
-			"DataStorageHandler - successfully retrieved data with key: %s",
-			dataKey,
-		)
-	}
-	return err
 }
 
 func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) error {
@@ -150,6 +157,43 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 		)
 		w.WriteHeader(http.StatusCreated)
 		return nil
+	default:
+		return err
+	}
+}
+
+func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) error {
+	// Parse request param
+	dataKey := r.URL.Query().Get("name")
+	log.Printf(
+		"DataStorageHandler - attempting deletion of data associated with the key: %s",
+		dataKey,
+	)
+
+	// Attempt to delete the data fro our storage
+	err := h.storage.DeleteData(dataKey)
+	switch err {
+	case nil:
+		// Successfully deleted data associated with key
+		log.Printf(
+			"DataStorageHandler - successfully deleted data with the key: %s",
+			dataKey,
+		)
+		w.WriteHeader(http.StatusOK)
+		return nil
+	case customerrors.DataStorageNameNotFound{}:
+		// Tell client if they used a bad key
+		log.Printf(
+			"DataStorageHandler - failed to retrieve data with the key: %s\n\t%v",
+			dataKey, err,
+		)
+
+		cErr := customerrors.ClientErrorMessage{
+			Error: err.Error(),
+		}
+		w.WriteHeader(http.StatusNotFound)
+		err := json.NewEncoder(w).Encode(cErr)
+		return err
 	default:
 		return err
 	}
