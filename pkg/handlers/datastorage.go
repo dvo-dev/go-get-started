@@ -37,6 +37,7 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Catch any anomaly errors - will write status code 500
 		var err error
+		w.Header().Set("Content-Type", "application/json")
 
 		switch r.Method {
 		case http.MethodGet:
