@@ -65,7 +65,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	// Parse request param
 	dataKey := r.URL.Query().Get("name")
 	log.Printf(
-		"DataStorageHandler - attempting retrieval of data associated with the key: %s",
+		"DataStorageHandler - attempting retrieval of data associated with the key: '%s'",
 		dataKey,
 	)
 
@@ -74,15 +74,11 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	switch err {
 	case nil:
 		// Successfully retrieved associated data
-		log.Printf(
-			"DataStorageHandler - successfully retrieved data with the key: %s",
-			dataKey,
-		)
 		w.WriteHeader(http.StatusFound)
 		_, err = w.Write(data)
 		if err == nil {
 			log.Printf(
-				"DataStorageHandler - successfully retrieved data with key: %s",
+				"DataStorageHandler - successfully retrieved data with key: '%s'",
 				dataKey,
 			)
 		}
@@ -90,7 +86,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	case customerrors.DataStorageNameNotFound{}:
 		// Tell client if they used a bad key
 		log.Printf(
-			"DataStorageHandler - failed to retrieve data with the key: %s\n\t%v",
+			"DataStorageHandler - failed to retrieve data with the key: '%s'\n\t%v",
 			dataKey, err,
 		)
 
@@ -120,7 +116,7 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 	name := strings.TrimSpace(r.PostFormValue("name"))
 	if len(name) > 0 {
 		log.Printf(
-			"DataStorageHandler - attempting to write data to key: %s",
+			"DataStorageHandler - attempting to write data to key: '%s'",
 			name,
 		)
 	} else {
@@ -137,7 +133,7 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 	}
 	if err != nil {
 		log.Printf(
-			"DataStorageHandler - failed to read request file with key: %s\n\t%v",
+			"DataStorageHandler - failed to read request file with key: '%s'\n\t%v",
 			name, err,
 		)
 		return err
@@ -152,7 +148,7 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 	// Other errors in the future
 	case nil:
 		log.Printf(
-			"successfully wrote to storage data with key: %s",
+			"successfully wrote to storage data with key: '%s'",
 			name,
 		)
 		w.WriteHeader(http.StatusCreated)
@@ -166,7 +162,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 	// Parse request param
 	dataKey := r.URL.Query().Get("name")
 	log.Printf(
-		"DataStorageHandler - attempting deletion of data associated with the key: %s",
+		"DataStorageHandler - attempting deletion of data associated with the key: '%s'",
 		dataKey,
 	)
 
@@ -176,7 +172,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 	case nil:
 		// Successfully deleted data associated with key
 		log.Printf(
-			"DataStorageHandler - successfully deleted data with the key: %s",
+			"DataStorageHandler - successfully deleted data with the key: '%s'",
 			dataKey,
 		)
 		w.WriteHeader(http.StatusOK)
@@ -184,7 +180,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 	case customerrors.DataStorageNameNotFound{}:
 		// Tell client if they used a bad key
 		log.Printf(
-			"DataStorageHandler - failed to retrieve data with the key: %s\n\t%v",
+			"DataStorageHandler - failed to retrieve data with the key: '%s'\n\t%v",
 			dataKey, err,
 		)
 
