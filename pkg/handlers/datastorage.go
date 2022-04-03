@@ -73,7 +73,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 
 	// Attempt to retrieve the data from our storage
 	data, err := h.storage.RetrieveData(dataKey)
-	switch err {
+	switch err.(type) {
 	case nil:
 		// Successfully retrieved associated data
 		log.Printf(
@@ -95,19 +95,24 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 			)
 		}
 		return nil
-	case customerrors.DataStorageNameNotFound{}:
+	case customerrors.DataStorageNameNotFound:
 		// Tell client if they used a bad key
 		log.Printf(
 			"DataStorageHandler - failed to retrieve data with the key: '%s'\n\t%v",
 			dataKey, err,
 		)
 
+		w.WriteHeader(http.StatusNotFound)
 		cErr := customerrors.ClientErrorMessage{
 			Error: err.Error(),
 		}
-		w.WriteHeader(http.StatusNotFound)
-		err := json.NewEncoder(w).Encode(cErr)
-		return err
+		if rErr := json.NewEncoder(w).Encode(cErr); rErr != nil {
+			log.Printf(
+				"DataStorageHandler - writing response failed: %v",
+				rErr,
+			)
+		}
+		return nil
 	default:
 		return err
 	}
@@ -191,7 +196,7 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 
 	// Attempt to delete the data fro our storage
 	err := h.storage.DeleteData(dataKey)
-	switch err {
+	switch err.(type) {
 	case nil:
 		// Successfully deleted data associated with key
 		log.Printf(
@@ -210,19 +215,24 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 			)
 		}
 		return nil
-	case customerrors.DataStorageNameNotFound{}:
+	case customerrors.DataStorageNameNotFound:
 		// Tell client if they used a bad key
 		log.Printf(
 			"DataStorageHandler - failed to retrieve data with the key: '%s'\n\t%v",
 			dataKey, err,
 		)
 
+		w.WriteHeader(http.StatusNotFound)
 		cErr := customerrors.ClientErrorMessage{
 			Error: err.Error(),
 		}
-		w.WriteHeader(http.StatusNotFound)
-		err := json.NewEncoder(w).Encode(cErr)
-		return err
+		if rErr := json.NewEncoder(w).Encode(cErr); rErr != nil {
+			log.Printf(
+				"DataStorageHandler - writing response failed: %v",
+				rErr,
+			)
+		}
+		return nil
 	default:
 		return err
 	}

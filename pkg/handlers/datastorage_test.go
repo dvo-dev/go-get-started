@@ -157,24 +157,24 @@ func TestDataStorage_StoreData(t *testing.T) {
 			err,
 		)
 	}
-	recMsg := responses.ResponsePayload{}
-	err = json.Unmarshal(data, &recMsg)
+	rcvMsg := responses.ResponsePayload{}
+	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
 			"incorrect response format",
 		)
 	}
 	expMsg := responses.DataStored{
-		DataName: "test",
+		DataName: testName,
 		Data:     []byte("test data"),
 	}.GetResponse()
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, recMsg) {
+	if !reflect.DeepEqual(expMsg, rcvMsg) {
 		t.Errorf(
 			"expected response: %+v but got: %+v",
-			expMsg, recMsg,
+			expMsg, rcvMsg,
 		)
 	}
 }
@@ -201,7 +201,6 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 			err,
 		)
 	}
-	// resp, err := testClient.Get(path)
 	resp, err := testClient.RoundTrip(req)
 	if err != nil {
 		t.Fatalf(
@@ -228,8 +227,8 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 			err,
 		)
 	}
-	recMsg := responses.ResponsePayload{}
-	err = json.Unmarshal(data, &recMsg)
+	rcvMsg := responses.ResponsePayload{}
+	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
 			"incorrect response format",
@@ -242,12 +241,69 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, recMsg) {
+	if !reflect.DeepEqual(expMsg, rcvMsg) {
 		t.Errorf(
 			"expected response: %+v but got: %+v",
-			expMsg, recMsg,
+			expMsg, rcvMsg,
 		)
 	}
+
+	t.Run("nonexistent name", func(t *testing.T) {
+
+		// Make GET request
+		path := fmt.Sprintf("%s?name=%s", testURL, testName+"foo")
+		req, err := http.NewRequest(http.MethodGet, path, nil)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+		resp, err = testClient.RoundTrip(req)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+
+		// Check status code
+		if resp.StatusCode != http.StatusNotFound {
+			t.Errorf(
+				"expected status code: %d but got: %d",
+				http.StatusNotFound,
+				resp.StatusCode,
+			)
+		}
+
+		// Read response body + assert
+		defer resp.Body.Close()
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+		rcvMsg := customerrors.ClientErrorMessage{}
+		err = json.Unmarshal(data, &rcvMsg)
+		if err != nil {
+			t.Error(
+				"incorrect response format",
+			)
+		}
+		expMsg := customerrors.ClientErrorMessage{
+			Error: customerrors.DataStorageNameNotFound{
+				Name: testName + "foo",
+			}.Error(),
+		}
+		if expMsg != rcvMsg {
+			t.Errorf(
+				"expected response: %+v but got: %+v",
+				expMsg, rcvMsg,
+			)
+		}
+	})
 }
 
 func TestDataStorage_DeleteData(t *testing.T) {
@@ -299,8 +355,8 @@ func TestDataStorage_DeleteData(t *testing.T) {
 			err,
 		)
 	}
-	recMsg := responses.ResponsePayload{}
-	err = json.Unmarshal(data, &recMsg)
+	rcvMsg := responses.ResponsePayload{}
+	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
 			"incorrect response format",
@@ -312,10 +368,67 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, recMsg) {
+	if !reflect.DeepEqual(expMsg, rcvMsg) {
 		t.Errorf(
 			"expected response: %+v but got: %+v",
-			expMsg, recMsg,
+			expMsg, rcvMsg,
 		)
 	}
+
+	t.Run("nonexistent name", func(t *testing.T) {
+
+		// Make GET request
+		path := fmt.Sprintf("%s?name=%s", testURL, testName)
+		req, err := http.NewRequest(http.MethodDelete, path, nil)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+		resp, err = testClient.RoundTrip(req)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+
+		// Check status code
+		if resp.StatusCode != http.StatusNotFound {
+			t.Errorf(
+				"expected status code: %d but got: %d",
+				http.StatusNotFound,
+				resp.StatusCode,
+			)
+		}
+
+		// Read response body + assert
+		defer resp.Body.Close()
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
+		rcvMsg := customerrors.ClientErrorMessage{}
+		err = json.Unmarshal(data, &rcvMsg)
+		if err != nil {
+			t.Error(
+				"incorrect response format",
+			)
+		}
+		expMsg := customerrors.ClientErrorMessage{
+			Error: customerrors.DataStorageNameNotFound{
+				Name: testName,
+			}.Error(),
+		}
+		if expMsg != rcvMsg {
+			t.Errorf(
+				"expected response: %+v but got: %+v",
+				expMsg, rcvMsg,
+			)
+		}
+	})
 }
