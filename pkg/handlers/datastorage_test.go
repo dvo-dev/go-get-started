@@ -163,7 +163,7 @@ func TestDataStorage_StoreData(t *testing.T) {
 			err,
 		)
 	}
-	rcvMsg := responses.ResponsePayload{}
+	rcvMsg := responses.DataStored{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
@@ -239,7 +239,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 			err,
 		)
 	}
-	rcvMsg := responses.ResponsePayload{}
+	rcvMsg := responses.DataFound{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
@@ -373,7 +373,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 			err,
 		)
 	}
-	rcvMsg := responses.ResponsePayload{}
+	rcvMsg := responses.DataDeleted{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	if err != nil {
 		t.Error(
