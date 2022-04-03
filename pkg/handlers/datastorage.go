@@ -10,6 +10,7 @@ import (
 
 	"github.com/dvo-dev/go-get-started/pkg/customerrors"
 	"github.com/dvo-dev/go-get-started/pkg/datastorage"
+	"github.com/dvo-dev/go-get-started/pkg/responses"
 )
 
 // DataStorageHandler is a wrapper struct for `DataStorage` implementations,
@@ -74,15 +75,25 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 	switch err {
 	case nil:
 		// Successfully retrieved associated data
+		log.Printf(
+			"DataStorageHandler - successfully retrieved data with key: '%s'",
+			dataKey,
+		)
 		w.WriteHeader(http.StatusFound)
-		_, err = w.Write(data)
-		if err == nil {
+
+		// Attempt to write response message
+		if rErr := responses.WriteJSON(w,
+			responses.DataFound{
+				DataName: dataKey,
+				Data:     data,
+			},
+		); rErr != nil {
 			log.Printf(
-				"DataStorageHandler - successfully retrieved data with key: '%s'",
-				dataKey,
+				"DataStorageHander - data retrieved but writing response failed: %v",
+				err,
 			)
 		}
-		return err
+		return nil
 	case customerrors.DataStorageNameNotFound{}:
 		// Tell client if they used a bad key
 		log.Printf(
@@ -152,6 +163,17 @@ func (h *DataStorageHandler) storeData(w http.ResponseWriter, r *http.Request) e
 			name,
 		)
 		w.WriteHeader(http.StatusCreated)
+
+		// Attempt to write response message
+		if rErr := responses.WriteJSON(w, responses.DataStored{
+			DataName: name,
+			Data:     data,
+		}); rErr != nil {
+			log.Printf(
+				"DataStorageHander - data written but writing response failed: %v",
+				err,
+			)
+		}
 		return nil
 	default:
 		return err
@@ -176,6 +198,16 @@ func (h *DataStorageHandler) deleteData(w http.ResponseWriter, r *http.Request) 
 			dataKey,
 		)
 		w.WriteHeader(http.StatusOK)
+
+		// Attempt to write response message
+		if rErr := responses.WriteJSON(w,
+			responses.DataDeleted{DataName: dataKey},
+		); rErr != nil {
+			log.Printf(
+				"DataStorageHander - data deleted but writing response failed: %v",
+				err,
+			)
+		}
 		return nil
 	case customerrors.DataStorageNameNotFound{}:
 		// Tell client if they used a bad key
