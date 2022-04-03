@@ -53,6 +53,7 @@ func (h *DataStorageHandler) HandleClientRequest() http.HandlerFunc {
 			}
 			w.WriteHeader(cErr.StatusCode())
 			err = json.NewEncoder(w).Encode(cErr.ClientErrorMsg())
+			return
 		}
 
 		if err != nil {
