@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/dvo-dev/go-get-started/pkg/datastorage"
 	"github.com/dvo-dev/go-get-started/pkg/handlers"
 	"github.com/dvo-dev/go-get-started/pkg/server"
 )
@@ -27,7 +28,7 @@ func main() {
 // initializing, as well as soft restarting the server if it crashes at any
 // point.
 func run() error {
-	var err error = nil
+	var err error
 	s := server.Server{}.InitializeServer()
 
 	// TODO: env vars
@@ -40,6 +41,16 @@ func run() error {
 	s.AssignHandler(
 		"/health",
 		handlers.RecoveryWrapper(handlers.HandleHealth()),
+	)
+
+	// TODO: decide if we want to attach handlers to the server
+	mem := datastorage.MemStorage{}.Initialize()
+	dsHandler := handlers.DataStorageHandler{}.Initialize(
+		mem,
+	)
+	s.AssignHandler(
+		"/datastorage",
+		handlers.RecoveryWrapper(dsHandler.HandleClientRequest()),
 	)
 
 	log.Println("Webapp server has been initialized, now serving...")

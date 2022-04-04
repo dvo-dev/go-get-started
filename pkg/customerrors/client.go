@@ -32,7 +32,7 @@ func (e ClientErrorBadMethod) Error() string {
 }
 
 func (e ClientErrorBadMethod) StatusCode() int {
-	return http.StatusBadRequest
+	return http.StatusMethodNotAllowed
 }
 
 func (e ClientErrorBadMethod) ClientErrorMsg() ClientErrorMessage {
