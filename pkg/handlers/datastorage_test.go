@@ -1,12 +1,9 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -89,56 +86,19 @@ func TestDataStorage_StoreData(t *testing.T) {
 	)
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
-	testClient := http.DefaultClient
 
 	testName := "test name"
 	testData := []byte("test data")
 
-	// Multipart form, assign name
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fw, err := writer.CreateFormField("name")
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	_, err = io.Copy(fw, strings.NewReader(testName))
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-
-	// Assign data
-	fw, err = writer.CreateFormFile("data", "test.log")
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	_, err = io.Copy(fw, bytes.NewReader(testData))
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-
-	// Close multipart form + make POST request
-	writer.Close()
-	req, err := http.NewRequest(http.MethodPost, testURL, bytes.NewReader(body.Bytes()))
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	resp, err := testClient.Do(req)
+	params := map[string]string{"name": testName}
+	uploadData := map[string][]byte{"data": testData}
+	resp, err := requests.PostRequest(
+		testURL,
+		"multipart/form-data",
+		&params,
+		&uploadData,
+		nil,
+	)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -193,7 +153,6 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	)
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
-	testClient := http.DefaultClient
 
 	testName := "testname"
 	testData := []byte("test data")
@@ -206,9 +165,8 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	}
 
 	// Make GET request
-	params := make(map[string]string)
-	params["name"] = testName
-	resp, err := requests.GetRequest(testURL, &params, testClient)
+	params := map[string]string{"name": testName}
+	resp, err := requests.GetRequest(testURL, &params, nil)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -259,7 +217,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 		// Make GET request
 		params["name"] = testName + "foo"
-		resp, err := requests.GetRequest(testURL, &params, testClient)
+		resp, err := requests.GetRequest(testURL, &params, nil)
 		if err != nil {
 			t.Fatalf(
 				"unexpected error occurred: %v",
