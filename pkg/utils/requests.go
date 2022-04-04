@@ -22,7 +22,7 @@ import (
 //
 // Returns the parsed response or error if this function failed.
 func GetRequest(
-	address string,
+	targetURL string,
 	params *map[string]string,
 	client *http.Client,
 ) (map[string]any, error) {
@@ -42,7 +42,7 @@ func GetRequest(
 	}
 
 	// Execute the request
-	resp, err := client.Get(address + func() string {
+	resp, err := client.Get(targetURL + func() string {
 		if queryParams != nil {
 			return (*queryParams).Encode()
 		} else {
@@ -66,10 +66,10 @@ func GetRequest(
 }
 
 func PostRequest(
-	address string,
+	targetURL string,
 	contentType string,
 	params *map[string]string,
-	files *map[string][]byte, // TODO: accomadate direct file names
+	uploadData *map[string][]byte, // TODO: accomadate direct file names
 	client *http.Client,
 ) (map[string]any, error) {
 	// Init client if none given
@@ -92,7 +92,7 @@ func PostRequest(
 				data.Set(k, v)
 			}
 		}
-		req, err = http.NewRequest(http.MethodPost, address, strings.NewReader(data.Encode()))
+		req, err = http.NewRequest(http.MethodPost, targetURL, strings.NewReader(data.Encode()))
 		req.Header.Set("Content-type", contentType)
 		req.Header.Add("Content-length", strconv.Itoa(len(data.Encode())))
 		if err != nil {
@@ -104,7 +104,7 @@ func PostRequest(
 		writer := multipart.NewWriter(body)
 
 		// Write additional params
-		if params != nil {
+		if params != nil && len(*params) > 0 {
 			for k, v := range *params {
 				fw, err := writer.CreateFormField(k)
 				if err != nil {
@@ -117,9 +117,9 @@ func PostRequest(
 			}
 		}
 
-		// Write files
-		if files != nil {
-			for k, f := range *files {
+		// Write uploadData
+		if uploadData != nil && len(*uploadData) > 0 {
+			for k, f := range *uploadData {
 				fw, err := writer.CreateFormFile(k, k)
 				if err != nil {
 					return nil, err
@@ -133,7 +133,7 @@ func PostRequest(
 
 		// Create the request
 		writer.Close()
-		req, err = http.NewRequest(http.MethodPost, address, bytes.NewReader(body.Bytes()))
+		req, err = http.NewRequest(http.MethodPost, targetURL, bytes.NewReader(body.Bytes()))
 		req.Header.Set("Content-type", writer.FormDataContentType())
 
 	case "application/json":
@@ -147,7 +147,7 @@ func PostRequest(
 		}
 
 		// Create request
-		req, err = http.NewRequest(http.MethodPost, address, bytes.NewBuffer(jsonParams))
+		req, err = http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(jsonParams))
 		req.Header.Set("Content-type", contentType)
 
 	default:
