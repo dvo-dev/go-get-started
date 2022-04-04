@@ -75,7 +75,7 @@ func PostRequest(
 	switch contentType {
 	case "application/x-www-form-urlencoded":
 		data := url.Values{}
-		if params != nil {
+		if params != nil && len(*params) > 0 {
 			for k, v := range *params {
 				data.Set(k, v)
 			}
