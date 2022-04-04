@@ -16,6 +16,7 @@ import (
 	"github.com/dvo-dev/go-get-started/pkg/customerrors"
 	"github.com/dvo-dev/go-get-started/pkg/datastorage"
 	"github.com/dvo-dev/go-get-started/pkg/responses"
+	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
 )
 
 // TODO: all these tests need to be rewritten once test helpers are in
@@ -192,7 +193,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	)
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
-	testClient := http.DefaultTransport
+	testClient := http.DefaultClient
 
 	testName := "testname"
 	testData := []byte("test data")
@@ -205,24 +206,12 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	}
 
 	// Make GET request
-	path := fmt.Sprintf("%s?name=%s", testURL, testName)
-	req, err := http.NewRequest(http.MethodGet, path, nil)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	resp, err := testClient.RoundTrip(req)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	params := make(map[string]string)
+	params["name"] = testName
+	resp, err := requests.GetRequest(testURL, &params, testClient)
 
 	// Check status code
-	if resp.StatusCode != http.StatusFound {
+	if resp.StatusCode != http.StatusOK {
 		t.Errorf(
 			"expected status code: %d but got: %d",
 			http.StatusCreated,
@@ -263,21 +252,8 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	t.Run("nonexistent name", func(t *testing.T) {
 
 		// Make GET request
-		path := fmt.Sprintf("%s?name=%s", testURL, testName+"foo")
-		req, err := http.NewRequest(http.MethodGet, path, nil)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
-		resp, err = testClient.RoundTrip(req)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		params["name"] = testName + "foo"
+		resp, err := requests.GetRequest(testURL, &params, testClient)
 
 		// Check status code
 		if resp.StatusCode != http.StatusNotFound {

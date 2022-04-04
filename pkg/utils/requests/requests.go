@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -25,7 +24,7 @@ func GetRequest(
 	targetURL string,
 	params *map[string]string,
 	client *http.Client,
-) (map[string]any, error) {
+) (*http.Response, error) {
 	// Init client if none given
 	if client == nil {
 		client = &http.Client{
@@ -36,6 +35,7 @@ func GetRequest(
 	// Add query params if applicable
 	var queryParams *url.Values
 	if params != nil && len(*params) != 0 {
+		queryParams = &url.Values{}
 		for k, v := range *params {
 			queryParams.Add(k, v)
 		}
@@ -44,25 +44,13 @@ func GetRequest(
 	// Execute the request
 	resp, err := client.Get(targetURL + func() string {
 		if queryParams != nil {
-			return (*queryParams).Encode()
+			return "?" + (*queryParams).Encode()
 		} else {
 			return ""
 		}
 	}())
-	if err != nil {
-		return nil, err
-	}
 
-	// Read response
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var parsed map[string]any
-	err = json.Unmarshal([]byte(body), &parsed)
-
-	return parsed, err
+	return resp, err
 }
 
 func PostRequest(
@@ -71,7 +59,7 @@ func PostRequest(
 	params *map[string]string,
 	uploadData *map[string][]byte, // TODO: accomadate direct file names
 	client *http.Client,
-) (map[string]any, error) {
+) (*http.Response, error) {
 	// Init client if none given
 	if client == nil {
 		client = &http.Client{
@@ -160,14 +148,5 @@ func PostRequest(
 		return nil, err
 	}
 
-	// Read response
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var parsed map[string]any
-	err = json.Unmarshal([]byte(body), &parsed)
-
-	return parsed, err
+	return resp, err
 }

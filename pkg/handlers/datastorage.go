@@ -86,7 +86,7 @@ func (h *DataStorageHandler) retrieveData(w http.ResponseWriter, r *http.Request
 			"DataStorageHandler - successfully retrieved data with key: '%s'",
 			dataKey,
 		)
-		w.WriteHeader(http.StatusFound)
+		w.WriteHeader(http.StatusOK)
 
 		// Attempt to write response message
 		if rErr := responses.WriteJSON(w,
