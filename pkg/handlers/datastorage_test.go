@@ -209,6 +209,12 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	params := make(map[string]string)
 	params["name"] = testName
 	resp, err := requests.GetRequest(testURL, &params, testClient)
+	if err != nil {
+		t.Fatalf(
+			"unexpected error occurred: %v",
+			err,
+		)
+	}
 
 	// Check status code
 	if resp.StatusCode != http.StatusOK {
@@ -254,6 +260,12 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 		// Make GET request
 		params["name"] = testName + "foo"
 		resp, err := requests.GetRequest(testURL, &params, testClient)
+		if err != nil {
+			t.Fatalf(
+				"unexpected error occurred: %v",
+				err,
+			)
+		}
 
 		// Check status code
 		if resp.StatusCode != http.StatusNotFound {

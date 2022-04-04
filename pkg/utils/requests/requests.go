@@ -122,6 +122,9 @@ func PostRequest(
 		// Create the request
 		writer.Close()
 		req, err = http.NewRequest(http.MethodPost, targetURL, bytes.NewReader(body.Bytes()))
+		if err != nil {
+			return nil, err
+		}
 		req.Header.Set("Content-type", writer.FormDataContentType())
 
 	case "application/json":
@@ -136,6 +139,9 @@ func PostRequest(
 
 		// Create request
 		req, err = http.NewRequest(http.MethodPost, targetURL, bytes.NewBuffer(jsonParams))
+		if err != nil {
+			return nil, err
+		}
 		req.Header.Set("Content-type", contentType)
 
 	default:
