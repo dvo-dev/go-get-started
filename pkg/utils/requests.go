@@ -33,23 +33,22 @@ func GetRequest(
 		}
 	}
 
-	// Construct request
-	req, err := http.NewRequest(http.MethodGet, address, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	// Add query params
-	if params != nil {
-		query := req.URL.Query()
+	// Add query params if applicable
+	var queryParams *url.Values
+	if params != nil && len(*params) != 0 {
 		for k, v := range *params {
-			query.Add(k, v)
+			queryParams.Add(k, v)
 		}
-		req.URL.RawQuery = query.Encode()
 	}
 
 	// Execute the request
-	resp, err := client.Do(req)
+	resp, err := client.Get(address + func() string {
+		if queryParams != nil {
+			return (*queryParams).Encode()
+		} else {
+			return ""
+		}
+	}())
 	if err != nil {
 		return nil, err
 	}
