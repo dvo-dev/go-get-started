@@ -43,15 +43,13 @@ func GetRequest(
 	}
 
 	// Execute the request
-	resp, err := client.Get(targetURL + func() string {
+	return client.Get(targetURL + func() string {
 		if queryParams != nil {
 			return "?" + (*queryParams).Encode()
 		} else {
 			return ""
 		}
 	}())
-
-	return resp, err
 }
 
 // PostRequest executes a POST request to the desired `targetURL`, supporting
@@ -167,10 +165,49 @@ func PostRequest(
 	}
 
 	// Execute the request
-	resp, err := client.Do(req)
+	return client.Do(req)
+}
+
+// CustomRequest attempts to make a request to `targetURL` usinng method
+// `reqMethod`, and directly encoding any `params` into the URL.
+//
+// This method is very barebones and is best suited for wrapping simple
+// requests.
+//
+// It optionally can use a given http.Client, or will default to a standard
+// client with a 10s timeout.
+//
+// Returns the raw response or error if this function failed.
+// TODO: support authentication methods
+func CustomRequest(
+	targetURL string,
+	reqMethod string,
+	params *map[string]string,
+	client *http.Client,
+) (*http.Response, error) {
+	// Init client if none given
+	if client == nil {
+		client = &http.Client{
+			Timeout: 10 * time.Second,
+		}
+	}
+
+	// Create query param if provided
+	if params != nil && len(*params) != 0 {
+		queryParams := url.Values{}
+		for k, v := range *params {
+			queryParams.Add(k, v)
+		}
+
+		targetURL = targetURL + "?" + queryParams.Encode()
+	}
+
+	// Create request
+	req, err := http.NewRequest(reqMethod, targetURL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return resp, err
+	// Execute the request
+	return client.Do(req)
 }

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -271,7 +270,6 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	)
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
-	testClient := http.DefaultTransport
 
 	testName := "testname"
 	testData := []byte("test data")
@@ -284,16 +282,8 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	}
 
 	// Make GET request
-	path := fmt.Sprintf("%s?name=%s", testURL, testName)
-	req, err := http.NewRequest(http.MethodDelete, path, nil)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	// resp, err := testClient.Get(path)
-	resp, err := testClient.RoundTrip(req)
+	params := map[string]string{"name": testName}
+	resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -342,15 +332,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	t.Run("nonexistent name", func(t *testing.T) {
 
 		// Make GET request
-		path := fmt.Sprintf("%s?name=%s", testURL, testName)
-		req, err := http.NewRequest(http.MethodDelete, path, nil)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
-		resp, err = testClient.RoundTrip(req)
+		resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
 		if err != nil {
 			t.Fatalf(
 				"unexpected error occurred: %v",
