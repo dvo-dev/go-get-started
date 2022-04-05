@@ -1,4 +1,4 @@
-package webapptool
+package subcommands
 
 import (
 	"fmt"

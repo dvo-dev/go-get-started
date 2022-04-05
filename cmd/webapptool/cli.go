@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dvo-dev/go-get-started/webapptool"
+	"github.com/dvo-dev/go-get-started/cmd/webapptool/subcommands"
 )
 
 func main() {
-	if err := webapptool.RootCmd.Execute(); err != nil {
+	if err := subcommands.RootCmd.Execute(); err != nil {
 		fmt.Printf("error running RootCmd: %v", err)
 		os.Exit(1)
 	}
