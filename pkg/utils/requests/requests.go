@@ -56,9 +56,13 @@ func GetRequest(
 
 // PostRequest executes a POST request to the desired `targetURL`, supporting
 // 3 `contentType`:
-// application/x-www-form-urlencoded
-// multipart/form-data
-// application/json
+//
+// - application/x-www-form-urlencoded
+//
+// - multipart/form-data
+//
+// - application/json
+//
 //
 // Pass any form parameters as `params`, and file/data to POST as `uploadData`.
 //
