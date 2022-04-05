@@ -45,7 +45,46 @@ var retrieveCmd = &cobra.Command{
 	},
 }
 
+var uploadCmd = &cobra.Command{
+	Use:   "upload",
+	Short: "Command to upload data (string only at this time)",
+	Long:  "This is a data subcommand to upload data (string only at this time) to the webapp's datastorage with a given name",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 2 {
+			fmt.Println("this command requires 2 arguments:\n\t1. Name of data\n\t2. Data value (string)")
+			return
+		}
+
+		params := map[string]string{"name": string(args[0])}
+		data := map[string][]byte{"data": []byte(args[1])}
+		resp, err := requests.PostRequest(
+			"http://0.0.0.0:8080/datastorage",
+			"multipart/form-data",
+			&params,
+			&data,
+			nil,
+		)
+
+		if err != nil {
+			fmt.Printf("failed to POST to /datastorage: %v\n", err)
+			return
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("failed to read response: %v\n", err)
+			return
+		}
+
+		var JSON map[string]any
+		err = json.Unmarshal([]byte(body), &JSON)
+		fmt.Printf("server response:\n\t%+v\n", JSON)
+	},
+}
+
 func init() {
 	dataCmd.AddCommand(retrieveCmd)
+	dataCmd.AddCommand(uploadCmd)
 	RootCmd.AddCommand(dataCmd)
 }
