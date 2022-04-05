@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 
 	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
 	"github.com/spf13/cobra"
@@ -20,7 +21,7 @@ var retrieveCmd = &cobra.Command{
 	Short: "Command to retrieve datastorage data with a given name",
 	Long:  "This is a data subcommand to access data in webapp's datastorage with a given name",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
+		if len(args) < 1 {
 			fmt.Println("this command requires the name of the data to access")
 			return
 		}
@@ -83,8 +84,44 @@ var uploadCmd = &cobra.Command{
 	},
 }
 
+var deleteCmd = &cobra.Command{
+	Use:   "delete",
+	Short: "Command to delete datastorage data with a given name",
+	Long:  "This is a data subcommand to delete data in webapp's datastorage with a given name",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) < 1 {
+			fmt.Println("this command requires the name of the data to delete")
+			return
+		}
+
+		params := map[string]string{"name": string(args[0])}
+		resp, err := requests.CustomRequest(
+			"http://0.0.0.0:8080/datastorage",
+			http.MethodDelete,
+			&params,
+			nil,
+		)
+		if err != nil {
+			fmt.Printf("failed to DELETE from /datastorage: %v\n", err)
+			return
+		}
+
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Printf("failed to read response: %v\n", err)
+			return
+		}
+
+		var JSON map[string]any
+		err = json.Unmarshal([]byte(body), &JSON)
+		fmt.Printf("server response:\n\t%+v\n", JSON)
+	},
+}
+
 func init() {
 	dataCmd.AddCommand(retrieveCmd)
 	dataCmd.AddCommand(uploadCmd)
+	dataCmd.AddCommand(deleteCmd)
 	RootCmd.AddCommand(dataCmd)
 }
