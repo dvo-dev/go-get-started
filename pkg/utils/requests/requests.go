@@ -13,13 +13,14 @@ import (
 	"time"
 )
 
-// GetRequest executes a GET request to the desired `url`, adding any `params`
-// to the raw query.
+// GetRequest executes a GET request to the desired `targetURL`, adding any
+// `params` to the raw query.
 //
 // It optionally can use a given http.Client, or will default to a standard
 // client with a 10s timeout.
 //
-// Returns the parsed response or error if this function failed.
+// Returns the raw response or error if this function failed.
+// TODO: support authentication methods
 func GetRequest(
 	targetURL string,
 	params *map[string]string,
@@ -53,6 +54,19 @@ func GetRequest(
 	return resp, err
 }
 
+// PostRequest executes a POST request to the desired `targetURL`, supporting
+// 3 `contentType`:
+// application/x-www-form-urlencoded
+// multipart/form-data
+// application/json
+//
+// Pass any form parameters as `params`, and file/data to POST as `uploadData`.
+//
+// It optionally can use a given http.Client, or will default to a standard
+// client with a 10s timeout.
+//
+// Returns the raw response or error if this function failed.
+// TODO: support authentication methods
 func PostRequest(
 	targetURL string,
 	contentType string,
