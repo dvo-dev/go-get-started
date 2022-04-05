@@ -42,6 +42,10 @@ var retrieveCmd = &cobra.Command{
 
 		var JSON map[string]any
 		err = json.Unmarshal([]byte(body), &JSON)
+		if err != nil {
+			fmt.Printf("failed to read response: %v\n", err)
+			return
+		}
 		fmt.Printf("server response:\n\t%+v\n", JSON)
 	},
 }
@@ -80,6 +84,10 @@ var uploadCmd = &cobra.Command{
 
 		var JSON map[string]any
 		err = json.Unmarshal([]byte(body), &JSON)
+		if err != nil {
+			fmt.Printf("failed to read response: %v\n", err)
+			return
+		}
 		fmt.Printf("server response:\n\t%+v\n", JSON)
 	},
 }
@@ -115,6 +123,10 @@ var deleteCmd = &cobra.Command{
 
 		var JSON map[string]any
 		err = json.Unmarshal([]byte(body), &JSON)
+		if err != nil {
+			fmt.Printf("failed to read response: %v\n", err)
+			return
+		}
 		fmt.Printf("server response:\n\t%+v\n", JSON)
 	},
 }
