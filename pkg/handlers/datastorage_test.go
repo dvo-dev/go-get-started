@@ -281,7 +281,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 		)
 	}
 
-	// Make GET request
+	// Make DELETE request
 	params := map[string]string{"name": testName}
 	resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
 	if err != nil {
@@ -331,7 +331,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 	t.Run("nonexistent name", func(t *testing.T) {
 
-		// Make GET request
+		// Make DELETE request
 		resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
 		if err != nil {
 			t.Fatalf(
