@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-	"reflect"
 	"strings"
 	"testing"
 
@@ -13,6 +12,8 @@ import (
 	"github.com/dvo-dev/go-get-started/pkg/datastorage"
 	"github.com/dvo-dev/go-get-started/pkg/responses"
 	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TODO: all these tests need to be rewritten once test helpers are in
@@ -28,54 +29,25 @@ func TestDataStorage_BadMethod(t *testing.T) {
 
 	// Create a PUT request
 	req, err := http.NewRequest(http.MethodPut, testURL, strings.NewReader(""))
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 	resp, err := testClient.Do(req)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
-	if resp.StatusCode != http.StatusMethodNotAllowed {
-		t.Errorf(
-			"expected error code: %d but got: %d",
-			http.StatusMethodNotAllowed,
-			resp.StatusCode,
-		)
-	}
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusMethodNotAllowed, resp.StatusCode)
 
 	// Read response body
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Check error response
 	rcvMsg := customerrors.ClientErrorMessage{}
 	err = json.Unmarshal(data, &rcvMsg)
-	if err != nil {
-		t.Error(
-			"incorrect response format",
-		)
-	}
+	require.NoError(t, err)
+
 	expMsg := customerrors.ClientErrorBadMethod{
 		RequestMethod: http.MethodPut,
 	}.ClientErrorMsg()
-	if expMsg.Error != rcvMsg.Error {
-		t.Errorf(
-			"expected response error: %s but got: %s",
-			expMsg.Error, rcvMsg.Error,
-		)
-	}
+	assert.Equal(t, expMsg.Error, rcvMsg.Error)
 }
 
 func TestDataStorage_StoreData(t *testing.T) {
@@ -89,6 +61,7 @@ func TestDataStorage_StoreData(t *testing.T) {
 	testName := "test name"
 	testData := []byte("test data")
 
+	// Generate and execute POST
 	params := map[string]string{"name": testName}
 	uploadData := map[string][]byte{"data": testData}
 	resp, err := requests.PostRequest(
@@ -98,51 +71,28 @@ func TestDataStorage_StoreData(t *testing.T) {
 		&uploadData,
 		nil,
 	)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Check status code
-	if resp.StatusCode != http.StatusCreated {
-		t.Errorf(
-			"expected status code: %d but got: %d",
-			http.StatusCreated,
-			resp.StatusCode,
-		)
-	}
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	// Read response body + assert
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
+
 	rcvMsg := responses.DataStored{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
-	if err != nil {
-		t.Error(
-			"incorrect response format",
-		)
-	}
+	require.NoError(t, err)
 	expMsg := responses.DataStored{
 		DataName: testName,
 		Data:     []byte("test data"),
 	}.GetResponse()
+
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, rcvMsg) {
-		t.Errorf(
-			"expected response: %+v but got: %+v",
-			expMsg, rcvMsg,
-		)
-	}
+	assert.Equal(t, expMsg, rcvMsg)
 }
 
 func TestDataStorage_RetrieveData(t *testing.T) {
@@ -153,113 +103,64 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
 
+	// Create GET request w/ params
 	testName := "testname"
 	testData := []byte("test data")
 	err := dsh.storage.StoreData(testName, testData)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Make GET request
 	params := map[string]string{"name": testName}
 	resp, err := requests.GetRequest(testURL, &params, nil)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Check status code
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf(
-			"expected status code: %d but got: %d",
-			http.StatusCreated,
-			resp.StatusCode,
-		)
-	}
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Read response body + assert
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
+
 	rcvMsg := responses.DataFound{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
-	if err != nil {
-		t.Error(
-			"incorrect response format",
-		)
-	}
+	require.NoError(t, err)
 	expMsg := responses.DataFound{
 		DataName: testName,
 		Data:     []byte("test data"),
 	}.GetResponse()
+
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, rcvMsg) {
-		t.Errorf(
-			"expected response: %+v but got: %+v",
-			expMsg, rcvMsg,
-		)
-	}
+	assert.Equal(t, expMsg, rcvMsg)
 
 	t.Run("nonexistent name", func(t *testing.T) {
 
 		// Make GET request
 		params["name"] = testName + "foo"
 		resp, err := requests.GetRequest(testURL, &params, nil)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
 
 		// Check status code
-		if resp.StatusCode != http.StatusNotFound {
-			t.Errorf(
-				"expected status code: %d but got: %d",
-				http.StatusNotFound,
-				resp.StatusCode,
-			)
-		}
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 
 		// Read response body + assert
 		defer resp.Body.Close()
 		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
+
 		rcvMsg := customerrors.ClientErrorMessage{}
 		err = json.Unmarshal(data, &rcvMsg)
-		if err != nil {
-			t.Error(
-				"incorrect response format",
-			)
-		}
+		require.NoError(t, err)
+
+		// Read response body + assert
 		expMsg := customerrors.ClientErrorMessage{
 			Error: customerrors.DataStorageNameNotFound{
 				Name: testName + "foo",
 			}.Error(),
 		}
-		if expMsg != rcvMsg {
-			t.Errorf(
-				"expected response: %+v but got: %+v",
-				expMsg, rcvMsg,
-			)
-		}
+		assert.Equal(t, expMsg, rcvMsg)
 	})
 }
 
@@ -271,110 +172,60 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	testServer := httptest.NewServer(dsh.HandleClientRequest())
 	testURL := testServer.URL + "/datastorage"
 
+	// Create DELETE request w/ params
 	testName := "testname"
 	testData := []byte("test data")
 	err := dsh.storage.StoreData(testName, testData)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Make DELETE request
 	params := map[string]string{"name": testName}
 	resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
 
 	// Check status code
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf(
-			"expected status code: %d but got: %d",
-			http.StatusCreated,
-			resp.StatusCode,
-		)
-	}
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Read response body + assert
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf(
-			"unexpected error occurred: %v",
-			err,
-		)
-	}
+	require.NoError(t, err)
+
 	rcvMsg := responses.DataDeleted{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
-	if err != nil {
-		t.Error(
-			"incorrect response format",
-		)
-	}
+	require.NoError(t, err)
 	expMsg := responses.DataDeleted{
 		DataName: testName,
 	}.GetResponse()
+
 	// Have to do this back and forth because Data is undefined type
 	JSON, _ := json.Marshal(expMsg)
 	_ = json.Unmarshal(JSON, &expMsg)
-	if !reflect.DeepEqual(expMsg, rcvMsg) {
-		t.Errorf(
-			"expected response: %+v but got: %+v",
-			expMsg, rcvMsg,
-		)
-	}
+	assert.Equal(t, expMsg, rcvMsg)
 
 	t.Run("nonexistent name", func(t *testing.T) {
 
 		// Make DELETE request
 		resp, err := requests.CustomRequest(testURL, http.MethodDelete, &params, nil)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
 
 		// Check status code
-		if resp.StatusCode != http.StatusNotFound {
-			t.Errorf(
-				"expected status code: %d but got: %d",
-				http.StatusNotFound,
-				resp.StatusCode,
-			)
-		}
+		assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 
 		// Read response body + assert
 		defer resp.Body.Close()
 		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
+
 		rcvMsg := customerrors.ClientErrorMessage{}
 		err = json.Unmarshal(data, &rcvMsg)
-		if err != nil {
-			t.Error(
-				"incorrect response format",
-			)
-		}
+		require.NoError(t, err)
+
 		expMsg := customerrors.ClientErrorMessage{
 			Error: customerrors.DataStorageNameNotFound{
 				Name: testName,
 			}.Error(),
 		}
-		if expMsg != rcvMsg {
-			t.Errorf(
-				"expected response: %+v but got: %+v",
-				expMsg, rcvMsg,
-			)
-		}
+		assert.Equal(t, expMsg, rcvMsg)
 	})
 }

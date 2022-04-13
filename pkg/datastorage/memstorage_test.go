@@ -3,6 +3,9 @@ package datastorage
 import (
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMemStorage_ImplementsDataStorage(t *testing.T) {
@@ -11,43 +14,29 @@ func TestMemStorage_ImplementsDataStorage(t *testing.T) {
 
 func TestMemStorage_Initialize(t *testing.T) {
 	mem := MemStorage{}.Initialize()
-	if mem == nil {
-		t.Error("returned a nil ptr")
-	}
-
-	if mem.data == nil || len(mem.data) != 0 {
-		t.Error("failed to initialize data map")
-	}
-
-	if mem.rwMu == nil {
-		t.Error("failed to initialize rwMutex")
-	}
+	assert.NotNil(t, mem)
+	assert.NotNil(t, mem.data)
+	assert.NotZero(t, mem.data)
+	assert.NotNil(t, mem.rwMu)
 }
 
 func TestMemStorage_RetrieveData(t *testing.T) {
+	// Embed test data
 	mem := MemStorage{}.Initialize()
 	testData := []byte("test data")
 	mem.data["test"] = testData
 
 	t.Run("existing data", func(t *testing.T) {
+		// Check correct data returned
 		data, err := mem.RetrieveData("test")
-		if err != nil {
-			t.Fatalf("received unexpected error: %v", err)
-		}
-
-		if string(testData) != string(data) {
-			t.Errorf(
-				"expected data: %s but got: %s",
-				testData, data,
-			)
-		}
+		require.NoError(t, err)
+		assert.Equal(t, testData, data)
 	})
 
 	t.Run("nonexistent key", func(t *testing.T) {
+		// Key does not exist, should error
 		_, err := mem.RetrieveData("foo")
-		if err == nil {
-			t.Error("expected error but got none")
-		}
+		assert.Error(t, err)
 	})
 }
 
@@ -57,72 +46,37 @@ func TestMemStorage_StoreData(t *testing.T) {
 	testData := []byte("test data")
 
 	t.Run("first write", func(t *testing.T) {
+		// Store data + check directly for correctness
 		err := mem.StoreData(dataName, testData)
-		if err != nil {
-			t.Fatalf("received unexpected error: %v", err)
-		}
-
-		if len(mem.data) != 1 {
-			t.Errorf(
-				"expected MemStorage data capacity of: %d, but got: %d",
-				1, len(mem.data),
-			)
-		}
+		require.NoError(t, err)
+		assert.Len(t, mem.data, 1)
 
 		data := mem.data[dataName]
-		if string(testData) != string(data) {
-			t.Errorf(
-				"expected data: %s but got: %s",
-				testData, data,
-			)
-		}
+		assert.Equal(t, testData, data)
 	})
 
 	t.Run("overwrite", func(t *testing.T) {
+		// Ensure StoreData properly overwrites with a duplicate key, does not
+		// create a second key value pair
 		testData = []byte("foobar")
 		err := mem.StoreData(dataName, testData)
-		if err != nil {
-			t.Fatalf("received unexpected error: %v", err)
-		}
-
-		if len(mem.data) != 1 {
-			t.Errorf(
-				"expected MemStorage data capacity of: %d, but got: %d",
-				1, len(mem.data),
-			)
-		}
+		require.NoError(t, err)
+		assert.Len(t, mem.data, 1)
 
 		data := mem.data[dataName]
-		if string(testData) != string(data) {
-			t.Errorf(
-				"expected data: %s but got: %s",
-				testData, data,
-			)
-		}
+		assert.Equal(t, testData, data)
 	})
 
 	t.Run("new data", func(t *testing.T) {
+		// Check StoreData can store more than 1 unique data instance
 		dataName2 := "test2"
 		testData2 := []byte("qwerty")
 		err := mem.StoreData(dataName2, testData2)
-		if err != nil {
-			t.Fatalf("received unexpected error: %v", err)
-		}
+		require.NoError(t, err)
 
-		if len(mem.data) != 2 {
-			t.Errorf(
-				"expected MemStorage data capacity of: %d, but got: %d",
-				2, len(mem.data),
-			)
-		}
-
+		assert.Len(t, mem.data, 2)
 		data := mem.data[dataName2]
-		if string(testData2) != string(data) {
-			t.Errorf(
-				"expected data: %s but got: %s",
-				testData2, data,
-			)
-		}
+		assert.Equal(t, testData2, data)
 	})
 }
 
@@ -131,31 +85,23 @@ func TestMemStorage_DeleteData(t *testing.T) {
 	dataName := "test"
 	testData := []byte("test data")
 
+	// Embed test data
 	err := mem.StoreData(dataName, testData)
-	if err != nil {
-		t.Fatalf("received unexpected error: %v", err)
-	}
+	require.NoError(t, err)
 
 	t.Run("delete existing data", func(t *testing.T) {
+		// Check data actually deleted
 		err = mem.DeleteData(dataName)
-		if err != nil {
-			t.Fatalf("received unexpected error: %v", err)
-		}
+		require.NoError(t, err)
 
-		if len(mem.data) != 0 {
-			t.Error("MemStorage data should be empty")
-		}
+		assert.Len(t, mem.data, 0)
 	})
 
 	t.Run("delete nonexistent data", func(t *testing.T) {
+		// Check DeleteData errors on bad key
 		err = mem.DeleteData(dataName)
-		if err == nil {
-			t.Error("expected error but got none")
-		}
-
-		if len(mem.data) != 0 {
-			t.Error("MemStorage data should be empty")
-		}
+		assert.Error(t, err)
+		assert.Len(t, mem.data, 0)
 	})
 }
 
