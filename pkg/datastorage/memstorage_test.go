@@ -11,7 +11,7 @@ func TestMemStorage_ImplementsDataStorage(t *testing.T) {
 
 func TestMemStorage_Initialize(t *testing.T) {
 	mem := MemStorage{}.Initialize()
-	if mem == nil {
+    if mem == nil { //nolint: statticcheck
 		t.Error("returned a nil ptr")
 	}
 
