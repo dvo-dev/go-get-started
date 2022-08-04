@@ -11,11 +11,11 @@ func TestMemStorage_ImplementsDataStorage(t *testing.T) {
 
 func TestMemStorage_Initialize(t *testing.T) {
 	mem := MemStorage{}.Initialize()
-    if mem == nil { //nolint: statticcheck
+    if mem == nil { //nolint: staticcheck
 		t.Error("returned a nil ptr")
 	}
 
-	if mem.data == nil || len(mem.data) != 0 {
+    if mem.data == nil || len(mem.data) != 0 {  //nolint: staticcheck	
 		t.Error("failed to initialize data map")
 	}
 
