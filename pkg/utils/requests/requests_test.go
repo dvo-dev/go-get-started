@@ -19,12 +19,23 @@ func TestRequests_GetRequest(t *testing.T) {
 	getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.Method, http.MethodGet, "Request is not for GET Method")
 		assert.Equal(t, r.URL.Query().Get("param1"), "foobar", "Param values do not match")
-
 	})
 
 	testServer := httptest.NewServer(getTestHandler)
 	params := map[string]string{"param1": "foobar"}
 	_, err := GetRequest(testServer.URL, &params, nil)
+	require.NoError(t, err)
+}
+
+func TestRequests_GetRequest_NilParams(t *testing.T) {
+	getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, r.Method, http.MethodGet, "Request is not for GET Method")
+		r.ParseForm()
+		assert.Empty(t, r.Form)
+	})
+
+	testServer := httptest.NewServer(getTestHandler)
+	_, err := GetRequest(testServer.URL, nil, nil)
 	require.NoError(t, err)
 }
 
