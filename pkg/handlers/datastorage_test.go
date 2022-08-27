@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -36,7 +36,7 @@ func TestDataStorage_BadMethod(t *testing.T) {
 
 	// Read response body
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	// Check error response
@@ -78,7 +78,7 @@ func TestDataStorage_StoreData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	rcvMsg := responses.DataStored{}.GetResponse()
@@ -119,7 +119,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	rcvMsg := responses.DataFound{}.GetResponse()
@@ -147,7 +147,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 		// Read response body + assert
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		rcvMsg := customerrors.ClientErrorMessage{}
@@ -188,7 +188,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
 	rcvMsg := responses.DataDeleted{}.GetResponse()
@@ -214,7 +214,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 		// Read response body + assert
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 
 		rcvMsg := customerrors.ClientErrorMessage{}
