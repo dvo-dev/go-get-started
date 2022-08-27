@@ -1,0 +1,31 @@
+name: Webapp - Gatekeep Test Coverage
+
+on:
+    pull_request:
+      branches: [main]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Set up Go
+              uses: actions/setup-go@v3
+              with:
+                  go-version: 1.19
+
+            - name: Test & Coverage
+              run: |
+                  make test-coverage
+
+            - name: Gatekeep Test Coverage
+              env:
+                TESTCOVERAGE_REQUIREMENT: 80
+              run: |
+                    test_coverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+                    echo "Total test coverage : $test_coverage %"
+                    if ! (( $(echo "$test_coverage $TESTCOVERAGE_REQUIREMENT" | awk '{print ($1 > $2)}') )); then
+                        echo "Current test coverage is below requirements ($TESTCOVERAGE_REQUIREMENT%), more unit testing needed."
+                        echo "Failed"
+                        exit 1
+                    fi
