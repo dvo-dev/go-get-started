@@ -2,7 +2,7 @@
 OUTDIR = ./bin
 OBJDIR = $(OUTDIR)/go-get-started
 BINARY = webapp
-TEST_COVERAGE = coverage.txt
+TEST_COVERAGE = coverage.out
 
 build:
 	mkdir -p $(OBJDIR)
