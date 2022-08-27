@@ -80,7 +80,6 @@ func TestDataStorage_StoreData(t *testing.T) {
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
-
 	rcvMsg := responses.DataStored{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	require.NoError(t, err)
@@ -121,7 +120,6 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
-
 	rcvMsg := responses.DataFound{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	require.NoError(t, err)
@@ -149,7 +147,6 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 		defer resp.Body.Close()
 		data, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
-
 		rcvMsg := customerrors.ClientErrorMessage{}
 		err = json.Unmarshal(data, &rcvMsg)
 		require.NoError(t, err)
@@ -190,7 +187,6 @@ func TestDataStorage_DeleteData(t *testing.T) {
 	defer resp.Body.Close()
 	data, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
-
 	rcvMsg := responses.DataDeleted{}.GetResponse()
 	err = json.Unmarshal(data, &rcvMsg)
 	require.NoError(t, err)
@@ -216,7 +212,6 @@ func TestDataStorage_DeleteData(t *testing.T) {
 		defer resp.Body.Close()
 		data, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
-
 		rcvMsg := customerrors.ClientErrorMessage{}
 		err = json.Unmarshal(data, &rcvMsg)
 		require.NoError(t, err)
