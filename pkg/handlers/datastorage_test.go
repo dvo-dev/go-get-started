@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -51,7 +51,7 @@ func TestDataStorage_BadMethod(t *testing.T) {
 
 	// Read response body
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -116,7 +116,7 @@ func TestDataStorage_StoreData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -184,7 +184,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -235,7 +235,7 @@ func TestDataStorage_RetrieveData(t *testing.T) {
 
 		// Read response body + assert
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			t.Fatalf(
 				"unexpected error occurred: %v",
@@ -302,7 +302,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 	// Read response body + assert
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatalf(
 			"unexpected error occurred: %v",
@@ -351,7 +351,7 @@ func TestDataStorage_DeleteData(t *testing.T) {
 
 		// Read response body + assert
 		defer resp.Body.Close()
-		data, err := ioutil.ReadAll(resp.Body)
+		data, err := io.ReadAll(resp.Body)
 		if err != nil {
 			t.Fatalf(
 				"unexpected error occurred: %v",
