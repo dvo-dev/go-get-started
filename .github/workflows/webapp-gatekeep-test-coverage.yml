@@ -23,7 +23,7 @@ jobs:
                 TESTCOVERAGE_REQUIREMENT: 80
               run: |
                     test_coverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
-                    echo "Total test coverage : $test_coverage%"
+                    echo "Total test coverage: $test_coverage%"
                     if ! (( $(echo "$test_coverage $TESTCOVERAGE_REQUIREMENT" | awk '{print ($1 > $2)}') )); then
                         echo "Current test coverage is below requirements ($TESTCOVERAGE_REQUIREMENT%), more unit testing needed."
                         exit 1
