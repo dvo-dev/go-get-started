@@ -2,6 +2,7 @@
 OUTDIR = ./bin
 OBJDIR = $(OUTDIR)/go-get-started
 BINARY = webapp
+TEST_COVERAGE = coverage.out
 
 build:
 	mkdir -p $(OBJDIR)
@@ -14,6 +15,11 @@ lint:
 test:
 	go clean -testcache
 	go test -race ./...
+
+test-coverage:
+	go clean -testcache
+	go test -race -coverprofile=$(TEST_COVERAGE) -covermode=atomic ./...
+	go tool cover -func $(TEST_COVERAGE)
 
 run: build
 	$(OBJDIR)/$(BINARY)
