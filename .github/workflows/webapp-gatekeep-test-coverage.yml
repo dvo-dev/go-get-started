@@ -1,11 +1,11 @@
-name: Webapp - Gatekeep Test Coverage
+name: Webapp - Test Coverage
 
 on:
     pull_request:
       branches: [main]
 
 jobs:
-    gatekeep-test-coverage:
+    test-coverage:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -17,6 +17,11 @@ jobs:
             - name: Test & Coverage
               run: |
                   make test-coverage
+
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v3
+              with:
+                  files: coverage.out
 
             - name: Gatekeep Test Coverage
               env:
