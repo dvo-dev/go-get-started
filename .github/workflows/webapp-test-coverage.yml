@@ -25,7 +25,7 @@ jobs:
 
             - name: Gatekeep Test Coverage
               env:
-                TESTCOVERAGE_REQUIREMENT: 80
+                TESTCOVERAGE_REQUIREMENT: 50
               run: |
                     test_coverage=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'`
                     echo "Total test coverage: $test_coverage%"
