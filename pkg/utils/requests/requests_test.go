@@ -26,12 +26,7 @@ func TestRequests_GetRequest(t *testing.T) {
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, r.Method, http.MethodGet, "Request is not for GET Method")
 			err := r.ParseForm()
-			if err != nil {
-				t.Fatalf(
-					"unexpected error occurred: %v",
-					err,
-				)
-			}
+			require.NoError(t, err)
 			assert.Empty(t, r.Form)
 		})
 
@@ -45,12 +40,7 @@ func TestRequests_PostRequest(t *testing.T) {
 	getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.Method, http.MethodPost, "Request is not for POST Method")
 		err := r.ParseForm()
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
 		assert.Empty(t, r.Form)
 	})
 
@@ -64,12 +54,7 @@ func TestRequest_CustomRequest(t *testing.T) {
 	getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, r.Method, "custom", "Request is not for custom method")
 		err := r.ParseForm()
-		if err != nil {
-			t.Fatalf(
-				"unexpected error occurred: %v",
-				err,
-			)
-		}
+		require.NoError(t, err)
 		assert.NotEmpty(t, r.Form)
 	})
 
