@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -45,7 +45,7 @@ func TestRequests_PostRequest(t *testing.T) {
 			var bodyBytes []byte
 			var err error
 			assert.NotNil(t, r.Body)
-			bodyBytes, err = ioutil.ReadAll(r.Body)
+			bodyBytes, err = io.ReadAll(r.Body)
 			require.NoError(t, err)
 			defer r.Body.Close()
 			assert.Equal(t, "{\"param1\":\"foobar\"}", string(bodyBytes), "FAIL - Body not matching")
@@ -62,7 +62,7 @@ func TestRequests_PostRequest(t *testing.T) {
 			var bodyBytes []byte
 			var err error
 			assert.NotNil(t, r.Body)
-			bodyBytes, err = ioutil.ReadAll(r.Body)
+			bodyBytes, err = io.ReadAll(r.Body)
 			require.NoError(t, err)
 			defer r.Body.Close()
 			assert.Empty(t, bodyBytes, "FAIL - Body not empty")
