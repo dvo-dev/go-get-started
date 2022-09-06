@@ -1,9 +1,9 @@
 package requests
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
-
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,9 +42,13 @@ func TestRequests_PostRequest(t *testing.T) {
 	t.Run("application/json", func(t *testing.T) {
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodPost, r.Method, "Request is not for POST Method")
-			err := r.ParseForm()
+			var bodyBytes []byte
+			var err error
+			assert.NotNil(t, r.Body)
+			bodyBytes, err = ioutil.ReadAll(r.Body)
 			require.NoError(t, err)
-			assert.Empty(t, r.Form)
+			defer r.Body.Close()
+			assert.Equal(t, "{\"param1\":\"foobar\"}", string(bodyBytes), "FAIL - Body not matching")
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
@@ -55,9 +59,13 @@ func TestRequests_PostRequest(t *testing.T) {
 	t.Run("no params application/json", func(t *testing.T) {
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodPost, r.Method, "Request is not for POST Method")
-			err := r.ParseForm()
+			var bodyBytes []byte
+			var err error
+			assert.NotNil(t, r.Body)
+			bodyBytes, err = ioutil.ReadAll(r.Body)
 			require.NoError(t, err)
-			assert.Empty(t, r.Form)
+			defer r.Body.Close()
+			assert.Empty(t, bodyBytes, "FAIL - Body not empty")
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
@@ -69,6 +77,7 @@ func TestRequests_PostRequest(t *testing.T) {
 	})
 	t.Run("default case", func(t *testing.T) {
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, http.MethodPost, r.Method, "Request is not for POST Method")
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
@@ -81,22 +90,27 @@ func TestRequests_PostRequest(t *testing.T) {
 	t.Run("application/x-www-form-urlencoded", func(t *testing.T) {
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodPost, r.Method, "Request is not for POST Method")
+			headers := r.Header
+			assert.NotNil(t, headers)
+			assert.Equal(t, "application/x-www-form-urlencoded", headers["Content-Type"][0])
+			assert.Equal(t, "13", headers["Content-Length"][0])
 			err := r.ParseForm()
 			require.NoError(t, err)
+			assert.NotEmpty(t, r.Form)
+			assert.Equal(t, "foobar", r.Form.Get("param1"))
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
-		params := map[string]string{}
+		params := map[string]string{"param1": "foobar"}
 		_, err := PostRequest(testServer.URL, "application/x-www-form-urlencoded", &params, nil, nil)
 		require.NoError(t, err)
 	})
 	t.Run("multipart/form-data", func(t *testing.T) {
-		// TODO: Test for upload data
 		getTestHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			assert.Equal(t, http.MethodPost, r.Method, "Request is not for POST Method")
-			err := r.ParseForm()
+			err := r.ParseMultipartForm(2 << 20)
 			require.NoError(t, err)
-			assert.Empty(t, r.Form)
+			assert.Equal(t, "foobar", r.MultipartForm.Value["param1"][0])
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
