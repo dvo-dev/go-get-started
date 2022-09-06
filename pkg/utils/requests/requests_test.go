@@ -81,8 +81,7 @@ func TestRequests_PostRequest(t *testing.T) {
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
-		params := map[string]string{}
-		_, err := PostRequest(testServer.URL, "", &params, nil, nil)
+		_, err := PostRequest(testServer.URL, "", nil, nil, nil)
 		if assert.Error(t, err) {
 			assert.Equal(t, "unsupported content type", err.Error())
 		}
