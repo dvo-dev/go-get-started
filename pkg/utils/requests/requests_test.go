@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -92,8 +93,8 @@ func TestRequests_PostRequest(t *testing.T) {
 			headers := r.Header
 			assert.NotNil(t, headers)
 			assert.Equal(t, "application/x-www-form-urlencoded", headers["Content-Type"][0])
-			assert.Equal(t, "13", headers["Content-Length"][0])
 			err := r.ParseForm()
+			assert.Equal(t, strconv.Itoa(int(r.ContentLength)), headers["Content-Length"][0])
 			require.NoError(t, err)
 			assert.NotEmpty(t, r.Form)
 			assert.Equal(t, "foobar", r.Form.Get("param1"))
@@ -110,6 +111,11 @@ func TestRequests_PostRequest(t *testing.T) {
 			err := r.ParseMultipartForm(2 << 20)
 			require.NoError(t, err)
 			assert.Equal(t, "foobar", r.MultipartForm.Value["param1"][0])
+			assert.NotNil(t, r.MultipartForm.File["file"][0])
+			fileContent, _ := r.MultipartForm.File["file"][0].Open()
+			byteContainer, err := io.ReadAll(fileContent) // you may want to handle the error
+			require.NoError(t, err)
+			assert.Equal(t, "value", string(byteContainer))
 		})
 
 		testServer := httptest.NewServer(getTestHandler)
