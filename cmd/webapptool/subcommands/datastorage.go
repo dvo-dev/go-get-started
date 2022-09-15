@@ -3,7 +3,7 @@ package subcommands
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
@@ -34,7 +34,7 @@ var retrieveCmd = &cobra.Command{
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("failed to read response: %v\n", err)
 			return
@@ -76,7 +76,7 @@ var uploadCmd = &cobra.Command{
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("failed to read response: %v\n", err)
 			return
@@ -115,7 +115,7 @@ var deleteCmd = &cobra.Command{
 		}
 
 		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			fmt.Printf("failed to read response: %v\n", err)
 			return
