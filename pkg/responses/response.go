@@ -8,11 +8,11 @@ import (
 // Response is a simple interface to ensure custom responses return a
 // standardized response body.
 type Response interface {
-	GetResponse() responsePayload
+	GetResponse() ResponsePayload
 }
 
-// responsePayload is the streamlined non-error client response body.
-type responsePayload struct {
+// ResponsePayload is the streamlined non-error client response body.
+type ResponsePayload struct {
 	Status  string `json:"status"`
 	Message string `json:"message,omitempty"`
 	Data    any    `json:"data,omitempty"`

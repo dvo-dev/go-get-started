@@ -9,8 +9,8 @@ type DataFound struct {
 	Data     []byte // TODO: add metadata?
 }
 
-func (d DataFound) GetResponse() responsePayload {
-	return responsePayload{
+func (d DataFound) GetResponse() ResponsePayload {
+	return ResponsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data with name: '%s' found",
@@ -33,8 +33,8 @@ type DataStored struct {
 	Data     []byte
 }
 
-func (d DataStored) GetResponse() responsePayload {
-	return responsePayload{
+func (d DataStored) GetResponse() ResponsePayload {
+	return ResponsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data written to storage with name: '%s'",
@@ -54,8 +54,8 @@ type DataDeleted struct {
 	DataName string
 }
 
-func (d DataDeleted) GetResponse() responsePayload {
-	return responsePayload{
+func (d DataDeleted) GetResponse() ResponsePayload {
+	return ResponsePayload{
 		Status: "success",
 		Message: fmt.Sprintf(
 			"data with name: '%s' deleted",
