@@ -3,7 +3,7 @@ services:
   web:
     image: go-get-started:latest
     ports:
-      - "8080"
+      - "8080:8080"
   db:
     image: postgres
     restart: always 
@@ -12,4 +12,4 @@ services:
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=app
     ports:
-      - "5432"
+      - "5432:5432"
