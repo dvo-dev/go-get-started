@@ -1,11 +1,11 @@
-package handlers
+package routes
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
 
-	"github.com/dvo-dev/go-get-started/pkg/customerrors"
+	"github.com/dvo-dev/go-get-started/customerrors"
 )
 
 // RecoveryWrapper is a function wrapper for the actual intended route handling
