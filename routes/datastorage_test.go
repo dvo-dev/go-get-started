@@ -1,4 +1,4 @@
-package handlers
+package routes
 
 import (
 	"encoding/json"
@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dvo-dev/go-get-started/pkg/customerrors"
-	"github.com/dvo-dev/go-get-started/pkg/datastorage"
-	"github.com/dvo-dev/go-get-started/pkg/responses"
-	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
+	"github.com/dvo-dev/go-get-started/customerrors"
+	"github.com/dvo-dev/go-get-started/responses"
+	"github.com/dvo-dev/go-get-started/services/datastorage"
+	"github.com/dvo-dev/go-get-started/utils/requests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

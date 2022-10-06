@@ -3,7 +3,7 @@ package datastorage
 import (
 	"sync"
 
-	"github.com/dvo-dev/go-get-started/pkg/customerrors"
+	"github.com/dvo-dev/go-get-started/customerrors"
 )
 
 // MemStorage is an in-memory storage solution that implements the `DataStorage`
