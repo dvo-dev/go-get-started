@@ -26,3 +26,7 @@ run: build
 
 clean:
 	rm -rf $(OUTDIR)
+
+make db-pgcli:
+    pgcli -h localhost -p 5432 -U admin app
+	
