@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/dvo-dev/go-get-started/pkg/utils/requests"
+	"github.com/dvo-dev/go-get-started/utils/requests"
 	"github.com/spf13/cobra"
 )
 

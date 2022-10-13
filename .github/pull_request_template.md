@@ -19,7 +19,7 @@
 - `pkg/database`
 - `cmd/webapp`
 
-### Description
+# Description
 <!--Required-->
 This is where you should describe the contents of this pull request at a **high level**, aim for 2-3 paragraphs of content but more is always better than less.
 

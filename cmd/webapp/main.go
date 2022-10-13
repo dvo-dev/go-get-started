@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/dvo-dev/go-get-started/pkg/datastorage"
-	"github.com/dvo-dev/go-get-started/pkg/handlers"
-	"github.com/dvo-dev/go-get-started/pkg/server"
+	"github.com/dvo-dev/go-get-started/routes"
+	"github.com/dvo-dev/go-get-started/server"
+	"github.com/dvo-dev/go-get-started/services/datastorage"
 )
 
 func main() {
@@ -40,17 +40,17 @@ func run() error {
 	// TODO: add route handlers
 	s.AssignHandler(
 		"/health",
-		handlers.RecoveryWrapper(handlers.HandleHealth()),
+		routes.RecoveryWrapper(routes.HandleHealth()),
 	)
 
 	// TODO: decide if we want to attach handlers to the server
 	mem := datastorage.MemStorage{}.Initialize()
-	dsHandler := handlers.DataStorageHandler{}.Initialize(
+	dsHandler := routes.DataStorageHandler{}.Initialize(
 		mem,
 	)
 	s.AssignHandler(
 		"/datastorage",
-		handlers.RecoveryWrapper(dsHandler.HandleClientRequest()),
+		routes.RecoveryWrapper(dsHandler.HandleClientRequest()),
 	)
 
 	log.Println("Webapp server has been initialized, now serving...")
